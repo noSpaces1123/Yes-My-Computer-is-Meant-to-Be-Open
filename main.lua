@@ -23,23 +23,16 @@ function love.load()
     Redness = 0
 
     InteractedWith = false
-    InteractedWithXSecondsAgo = 0
-    LastOpened = 0
+    InteractedWithAt = -1
+
+    local dateTable = os.date("*t")
+    LastOpened = dateTable.hour .. ":" .. dateTable.min
 end
 
 function love.update(dt)
-    -- last opened
-    LastOpened = LastOpened + dt
-
-    if InteractedWith then
-        InteractedWithXSecondsAgo = InteractedWithXSecondsAgo + dt
-    end
-
     -- redness
     local maxDistance = 100
     local magnitude = Distance(MousePositionLastFrame[1], MousePositionLastFrame[2], love.mouse.getX(), love.mouse.getY()) / maxDistance
-
-    local beforeRedness = Redness
 
     Redness = Redness + magnitude / 8
     if Redness > 1 then
@@ -74,8 +67,8 @@ function love.draw()
     love.graphics.printf(Subtext, 0, WINDOW.CENTER_Y + Fonts.text:getHeight() / 2 + spacing, WINDOW.WIDTH, "center")
 
     love.graphics.setFont(Fonts.small)
-    love.graphics.print("This computer was " .. (InteractedWith and "" or "not ") .. "interacted with" .. (InteractedWith and " " .. math.floor(InteractedWithXSecondsAgo) .. " seconds ago." or "."), padding, WINDOW.HEIGHT - Fonts.small:getHeight() * 2 - padding * 1.5)
-    love.graphics.print("Opened " .. math.floor(LastOpened) .. " seconds ago.", padding, WINDOW.HEIGHT - Fonts.small:getHeight() - padding)
+    love.graphics.print("This computer has " .. (InteractedWith and "last" or "not") .. " been interacted with" .. (InteractedWith and " at " .. InteractedWithAt .. "." or "."), padding, WINDOW.HEIGHT - Fonts.small:getHeight() * 2 - padding * 1.5)
+    love.graphics.print("Opened at " .. LastOpened .. ".", padding, WINDOW.HEIGHT - Fonts.small:getHeight() - padding)
 
     love.graphics.origin()
 end
@@ -87,7 +80,9 @@ end
 function MarkAsInteractedWithIf(bool)
     if not bool then return end
     InteractedWith = true
-    InteractedWithXSecondsAgo = 0
+
+    local dateTable = os.date("*t")
+    InteractedWithAt = dateTable.hour .. ":" .. dateTable.min
 end
 
 function love.mousepressed()
